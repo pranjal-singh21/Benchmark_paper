@@ -1,0 +1,8 @@
+id: silence-stops-traffic
+description: With transmission disabled, the node's status frame must disappear.
+steps:
+  - wait_uart:     { node: bms, text: "BMS ready", timeout_ms: 500 }
+  - expect_can:    { id: 0x604, within_ms: 300, label: "status frame present initially" }
+  - node_silence:  { node: bms, silence: true }
+  - run_for:       { ms: 200 }
+  - expect_no_can: { id: 0x604, for_ms: 300, label: "silent once transmission is disabled" }

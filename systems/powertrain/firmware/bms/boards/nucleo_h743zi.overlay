@@ -1,0 +1,20 @@
+/*
+ * BMS devicetree overlay for nucleo_h743zi.
+ *
+ * The board's own .dts already does two things this file therefore does not
+ * repeat: it selects the CAN controller with `zephyr,canbus = &fdcan1` in
+ * /chosen, and it assigns the pins with
+ * `pinctrl-0 = <&fdcan1_rx_pd0 &fdcan1_tx_pd1>`.
+ *
+ * What is left is the bit rate and enabling the node. `bus-speed` is the
+ * property name in the can-controller binding at Zephyr v3.5.0; it is not
+ * `bitrate`, and a wrong property name here is silently ignored by the
+ * devicetree compiler rather than reported, which is why it is called out.
+ *
+ * 500000 bit/s is the powertrain domain's CAN 2.0B rate.
+ */
+
+&fdcan1 {
+	bus-speed = <500000>;
+	status = "okay";
+};

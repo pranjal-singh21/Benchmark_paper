@@ -1,0 +1,13 @@
+!systems/**/reference/*.elf
+*.bin
+*.elf
+*.log
+*.pyc
+.detect-env
+.generated/
+.venv/
+__pycache__/
+build/
+harness/tests/fixtures/canary/bms/build/
+results/boot-check/
+results/runs/

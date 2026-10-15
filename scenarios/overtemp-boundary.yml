@@ -1,0 +1,17 @@
+id: overtemp-boundary
+description: >
+  The over-temperature fault must not fire at exactly the configured limit, and
+  must fire one tenth of a degree above it. The detection region is one point.
+steps:
+  - wait_uart:     { node: bms, text: "BMS ready", timeout_ms: 500 }
+  - expect_no_can: { id: 0x604, signals: { fault_code: OVERTEMP }, for_ms: 200,
+                     label: "quiet while healthy" }
+  - write_symbol:  { node: bms, symbol: g_cell_temp_dC, value: 550 }
+  - expect_no_can: { id: 0x604, signals: { fault_code: OVERTEMP }, for_ms: 300,
+                     label: "550 is at the limit and is legal" }
+  - write_symbol:  { node: bms, symbol: g_cell_temp_dC, value: 551 }
+  - expect_can:
+      id: 0x604
+      signals: { fault_code: OVERTEMP }
+      within_ms: 300
+      label: "fault raised one tenth of a degree above the limit"

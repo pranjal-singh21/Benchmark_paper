@@ -1,0 +1,85 @@
+# CAN contract for the powertrain domain.
+#
+# This file is the contract. The firmware is one implementation of it, and the
+# harness reads this rather than knowing any of it. If the two disagree, the
+# frame on the bus is what the firmware does and this is what everything else
+# believes, so a mismatch is a real defect and not a documentation problem.
+#
+# BIT LAYOUT is little-endian, Intel style. `start_bit` is the position of the
+# signal's least significant bit, counted from bit 0 of byte 0, where byte N
+# occupies bits 8N..8N+7 and bit 0 within a byte is its least significant bit.
+# A signal of length L at start_bit S therefore occupies bits S..S+L-1 of the
+# 64-bit little-endian integer formed from the eight data bytes.
+#
+# `signed:` IS MANDATORY on every signal. A signal without it is a hard load
+# failure, never a default. Inferring signedness from a name or a comment puts
+# project knowledge into the engine and produces exactly the bug where -5000 mA
+# round-trips as 16772216.
+
+messages:
+  - id: 0x604
+    name: bms_status
+    dlc: 8
+    sender: bms
+    signals:
+      - name: fault_code
+        start_bit: 0
+        length: 8
+        signed: false
+        scale: 1
+        offset: 0
+
+      - name: pack_mv
+        start_bit: 8
+        length: 24
+        signed: false
+        scale: 1
+        offset: 0
+        unit: mV
+
+      # Signed because discharge current is negative. Declared, never inferred.
+      - name: pack_ma
+        start_bit: 32
+        length: 16
+        signed: true
+        scale: 1
+        offset: 0
+        unit: mA
+
+      # Changes on every transmission. This is why assertions compile to a
+      # (value, mask) pair and never to equality: a frame that is otherwise
+      # exactly right would fail an equality match intermittently.
+      - name: rolling_counter
+        start_bit: 48
+        length: 4
+        signed: false
+        scale: 1
+        offset: 0
+
+      - name: checksum
+        start_bit: 56
+        length: 8
+        signed: false
+        scale: 1
+        offset: 0
+
+  - id: 0x605
+    name: vcu_status
+    dlc: 8
+    sender: vcu
+    signals:
+      # The count of bms_status frames this node has observed.
+      - name: bms_frames_seen
+        start_bit: 0
+        length: 16
+        signed: false
+        scale: 1
+        offset: 0
+
+enums:
+  fault_code:
+    0: NONE
+    1: OVERTEMP
+    2: OVERVOLT
+    3: UNDERVOLT
+    4: HEARTBEAT_LOST

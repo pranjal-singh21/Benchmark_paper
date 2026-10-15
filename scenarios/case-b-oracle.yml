@@ -1,0 +1,21 @@
+id: case-b-oracle
+description: >
+  An ORACLE failure, constructed on purpose. The stimulus is exactly right: at
+  the configured limit the defective build raises a fault and the correct build
+  does not, so the two execute differently. The assertion then checks something
+  that is true in BOTH builds, so both verdicts are PASS and the defect goes
+  undetected.
+
+  This is the case rung 4 must be able to distinguish from a stimulus failure.
+  The two need opposite advice: here the stimulus is already right and the
+  assertion is wrong, so telling the generator to move its injection would send
+  it in exactly the wrong direction.
+steps:
+  - wait_uart:     { node: bms, text: "BMS ready", timeout_ms: 500 }
+  - write_symbol:  { node: bms, symbol: g_cell_temp_dC, value: 550 }
+  - run_for:       { ms: 200 }
+  - expect_symbol:
+      node: bms
+      symbol: g_tx_enable
+      equals: 1
+      label: "transmit enable is untouched by the fault, in both builds"

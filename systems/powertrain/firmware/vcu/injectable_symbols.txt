@@ -1,0 +1,7 @@
+# Injection targets for the VCU node. Format documented in the BMS file.
+
+# symbol             unit          min         max     flags
+g_tx_enable          boolean         0           1
+g_peer_timeout_ms    milliseconds    0       10000
+
+g_gc_canary          none            0  4294967295    not-injectable

@@ -1,0 +1,26 @@
+# THE ONE FILE IN THE REPOSITORY WHERE A PERIPHERAL NAME MAY APPEAR.
+#
+# harness/tests/test_purity.py scans every file in harness/ for peripheral names,
+# message identifiers, node names and signal spellings, and declares exactly two
+# exceptions: this file and the test itself.
+#
+# The reason is portability, and it is not theoretical. System B runs on the same
+# STM32H743 but uses fdcan2 and usart2. A single hardcoded `fdcan1` anywhere in
+# the engine makes the generality claim false, and the failure would appear as a
+# system that boots and silently carries no traffic.
+
+bms_ecu:
+  repl: platforms/boards/bms_ecu.repl
+  zephyr_board: nucleo_h743zi
+  can_peripheral: sysbus.fdcan1
+  uart_peripheral: sysbus.usart3
+  cpu_peripheral: sysbus.cpu
+  can_bitrate: 500000
+
+vcu_ecu:
+  repl: platforms/boards/vcu_ecu.repl
+  zephyr_board: nucleo_h743zi
+  can_peripheral: sysbus.fdcan1
+  uart_peripheral: sysbus.usart3
+  cpu_peripheral: sysbus.cpu
+  can_bitrate: 500000

@@ -1,0 +1,14 @@
+id: overtemp-well-past
+description: >
+  Inject a temperature comfortably above the limit and require the fault. This
+  is the scenario a reasonable engineer writes, it achieves the same coverage of
+  the comparison as the boundary scenario, and it cannot distinguish > from >=,
+  because above the limit the two operators behave identically.
+steps:
+  - wait_uart:    { node: bms, text: "BMS ready", timeout_ms: 500 }
+  - write_symbol: { node: bms, symbol: g_cell_temp_dC, value: 900 }
+  - expect_can:
+      id: 0x604
+      signals: { fault_code: OVERTEMP }
+      within_ms: 300
+      label: "fault raised well above the limit"

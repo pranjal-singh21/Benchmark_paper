@@ -1,0 +1,6 @@
+board_alpha:
+  repl: platforms/boards/board_alpha.repl
+  zephyr_board: target_alpha
+  can_peripheral: machine.link_ctrl_a
+  uart_peripheral: machine.console_a
+  can_bitrate: 250000

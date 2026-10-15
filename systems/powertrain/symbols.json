@@ -1,0 +1,47 @@
+{
+  "generated_from": "systems/powertrain/firmware/bms/build/zephyr/zephyr.elf",
+  "elf_sha256": "4943d509b745292fb148437312e10214db7557003166f30c3225803b3d440c3c",
+  "declared_from": "systems/powertrain/firmware/bms/injectable_symbols.txt",
+  "symbols": {
+    "g_cell_temp_dC": {
+      "address": "0x24000056",
+      "size": 2,
+      "c_type": "int16_t",
+      "unit": "deci-degrees-C",
+      "range": [
+        -400,
+        1500
+      ]
+    },
+    "g_pack_mv": {
+      "address": "0x24000004",
+      "size": 4,
+      "c_type": "uint32_t",
+      "unit": "millivolts",
+      "range": [
+        0,
+        500000
+      ]
+    },
+    "g_pack_ma": {
+      "address": "0x24000054",
+      "size": 2,
+      "c_type": "int16_t",
+      "unit": "milliamps",
+      "range": [
+        -32000,
+        32000
+      ]
+    },
+    "g_tx_enable": {
+      "address": "0x24000078",
+      "size": 1,
+      "c_type": "uint8_t",
+      "unit": "boolean",
+      "range": [
+        0,
+        1
+      ]
+    }
+  }
+}

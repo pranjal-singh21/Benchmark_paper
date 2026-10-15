@@ -1,0 +1,12 @@
+buses:
+  - id: bus_one
+    type: link
+    bitrate: 250000
+
+nodes:
+  - id: node_one
+    type: real
+    board: board_alpha
+    elf: build/node_one.elf
+    buses: [bus_one]
+    dut: true

@@ -1,0 +1,4 @@
+buses:
+  - id: bus_one
+    type: link
+    bitrate: 250000

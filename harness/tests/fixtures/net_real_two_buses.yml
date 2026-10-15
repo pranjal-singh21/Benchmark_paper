@@ -1,0 +1,16 @@
+buses:
+  - id: bus_one
+    type: link
+    bitrate: 250000
+  - id: bus_two
+    type: link
+    bitrate: 250000
+
+nodes:
+  - id: node_one
+    type: real
+    board: board_alpha
+    elf: build/node_one.elf
+    boot_text: "node one up"
+    buses: [bus_one, bus_two]
+    dut: true

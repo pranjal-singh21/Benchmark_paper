@@ -1,0 +1,55 @@
+:name: BMS boot check
+:description: Boots the BMS firmware on an emulated Nucleo-H743ZI and captures its console UART.
+
+# Paths are Renode monitor variables so this script works standalone and from
+# scripts/boot-check.sh, which overrides them with absolute paths via -e.
+# `?=` assigns only if unset, so the caller always wins.
+$platform?=@platforms/boards/bms_ecu.repl
+$elf?=@systems/powertrain/firmware/bms/build/zephyr/zephyr.elf
+$uartLog?=@/tmp/detect-bms-uart.log
+
+mach create "bms"
+machine LoadPlatformDescription $platform
+sysbus LoadELF $elf
+
+# ---------------------------------------------------------------------------
+# The CAN controller must be attached to a medium.
+#
+# Without this, Renode's MCAN model has no FrameSent event to raise, logs
+#
+#   fdcan1: FrameSent is not initialized. Is the controller connected to medium?
+#
+# and the transmit never completes. The Zephyr driver then waits forever for a
+# completion interrupt that cannot arrive, and the firmware's periodic loop stops
+# at its first can_send having already printed its banner. The symptom is a board
+# that boots perfectly and then goes silent, which reads like a firmware bug and
+# is not one: the firmware is correct and the emulated board simply was not
+# plugged into a bus.
+#
+# One node on the hub is enough to make transmission complete. Phase 1 attaches
+# the other nodes to this same hub.
+# ---------------------------------------------------------------------------
+emulation CreateCANHub "canHub"
+connector Connect sysbus.fdcan1 canHub
+
+# A file backend, not showAnalyzer. This has to work headless, where there is no
+# window to show, and the file backend writes exactly the bytes the firmware
+# emitted: no timestamps, no decoration, nothing host-derived. That is what makes
+# a sha256 of this file meaningful.
+#
+# NOTE: this backend does not truncate an existing file, it renames the old one
+# aside as <name>.1. scripts/boot-check.sh therefore wipes the whole run
+# directory first, so no stale rotation can ever be picked up by a glob and
+# folded into the hash.
+sysbus.usart3 CreateFileBackend $uartLog true
+
+# Virtual time, not wall clock. RunFor advances the emulation by exactly five
+# emulated seconds and stops, so this produces the same result on a loaded
+# machine as on an idle one. Determinism starts here.
+#
+# Five seconds is chosen so the firmware's one-per-second report lands well away
+# from the window boundary. A report emitted exactly at the cut would make the
+# line count, and therefore the hash, sensitive to rounding.
+emulation RunFor "00:00:05"
+
+quit

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+#
+# Renode wrapper.
+#
+# Every invocation of Renode in this project goes through this file, so that the
+# pinned installation is the only one that can ever run. Calling `renode` from
+# PATH would pick up whatever the machine happens to have, and a different Renode
+# silently changes peripheral behaviour and therefore every measured latency.
+#
+# The portable release bundles its own runtime, so no system Mono or .NET package
+# is needed and none is looked for.
+#
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# ---------------------------------------------------------------------------
+# Re-enter through a space-free path.
+#
+# Zephyr's devicetree preprocessing splits paths at spaces. Measured directly,
+# with this repository in a folder named "benchmark paper":
+#
+#   -- Application: /mnt/c/Users/djtde/Downloads/benchmark paper/.../bms
+#   <command-line>: fatal error: /mnt/c/Users/djtde/Downloads/benchmark:
+#                   No such file or directory
+#
+# Redirecting the build directory does not help: the failure is in handling the
+# SOURCE path, so it happens wherever the output goes.
+#
+# CMake does not resolve a symlink back to its real path, so a space-free symlink
+# to this repository is a usable build root. Every script re-executes itself
+# through that symlink before doing any work, which means the toolchain never
+# sees a path containing a space, and the repository can still live wherever the
+# user wants it.
+#
+# After the exec, ROOT resolves to the symlink itself, which contains no space,
+# so this branch cannot recurse.
+# ---------------------------------------------------------------------------
+case "$ROOT" in
+  *" "*)
+    DETECT_LINK="${DETECT_LINK:-$HOME/detect-master}"
+    if [ "$(readlink -f "$DETECT_LINK" 2>/dev/null)" != "$(readlink -f "$ROOT")" ]; then
+        rm -f "$DETECT_LINK"
+        ln -s "$ROOT" "$DETECT_LINK" || {
+            echo "ERROR: cannot create the space-free symlink at $DETECT_LINK" >&2
+            echo "       The toolchain cannot build from a path containing a space." >&2
+            exit 2
+        }
+    fi
+    export DETECT_LINK
+    exec bash "$DETECT_LINK/scripts/$(basename "${BASH_SOURCE[0]}")" "$@"
+    ;;
+esac
+
+ENVFILE="$ROOT/.detect-env"
+
+if [ ! -f "$ENVFILE" ]; then
+    echo "ERROR: $ENVFILE is missing. Run: bash scripts/setup.sh" >&2
+    exit 2
+fi
+# shellcheck source=/dev/null
+. "$ENVFILE"
+
+BIN="$RENODE_HOME/renode"
+if [ ! -x "$BIN" ]; then
+    echo "ERROR: Renode $RENODE_VERSION is not installed at $BIN" >&2
+    echo "       Run: bash scripts/setup.sh renode" >&2
+    exit 2
+fi
+
+exec "$BIN" "$@"

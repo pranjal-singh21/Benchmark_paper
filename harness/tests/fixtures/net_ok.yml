@@ -1,0 +1,31 @@
+buses:
+  - id: bus_one
+    type: link
+    bitrate: 250000
+  - id: bus_two
+    type: link
+    bitrate: 125000
+
+nodes:
+  - id: node_one
+    type: real
+    board: board_alpha
+    elf: systems/example/firmware/node_one/build/zephyr/zephyr.elf
+    boot_text: "node one up"
+    buses: [bus_one]
+    dut: true
+    tx_enable_symbol: g_example_enable
+
+  - id: node_two
+    type: real
+    board: board_beta
+    elf: systems/example/firmware/node_two/build/zephyr/zephyr.elf
+    boot_text: "node two up"
+    buses: [bus_one]
+
+  - id: node_three
+    type: scripted
+    buses: [bus_one, bus_two]
+    emits: [17, 18]
+    period_ms: 100
+    default_signals: { sig_one: VAL_ONE, sig_two: 3 }

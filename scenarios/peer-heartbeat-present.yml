@@ -1,0 +1,5 @@
+id: peer-heartbeat-present
+description: The peer's heartbeat must be on the bus while it is transmitting.
+steps:
+  - wait_uart:  { node: bms, text: "BMS ready", timeout_ms: 500 }
+  - expect_can: { id: 0x605, within_ms: 300, label: "peer heartbeat observed" }

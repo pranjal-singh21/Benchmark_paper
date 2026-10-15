@@ -1,0 +1,17 @@
+# Synthetic board definitions for the network.py tests. Nothing here names a
+# real board, peripheral or target of this project.
+board_alpha:
+  repl: platforms/boards/board_alpha.repl
+  zephyr_board: target_alpha
+  can_peripheral: machine.link_ctrl_a
+  uart_peripheral: machine.console_a
+  cpu_peripheral: machine.cpu
+  can_bitrate: 250000
+
+board_beta:
+  repl: platforms/boards/board_beta.repl
+  zephyr_board: target_beta
+  can_peripheral: machine.link_ctrl_b
+  uart_peripheral: machine.console_b
+  cpu_peripheral: machine.cpu
+  can_bitrate: 250000

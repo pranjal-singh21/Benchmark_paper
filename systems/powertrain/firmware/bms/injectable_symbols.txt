@@ -1,0 +1,32 @@
+# Injection targets for the BMS node.
+#
+# Single source of truth for three things:
+#   - CMakeLists.txt adds -Wl,--undefined=<symbol> for every entry
+#   - scripts/check_symbols.py asserts every entry survived into the ELF
+#   - harness/symbols.py merges these declarations with the ELF to emit
+#     symbols.json, and enforces the range on every injected write
+#
+# FORMAT, whitespace separated:
+#     <symbol>   <unit>   <min>   <max>   [flags]
+#
+# The range is not documentation. harness/symbols.py refuses any write outside
+# it, naming the symbol and both bounds. Silently truncating an out-of-range
+# write into a valid one is falsification, and a truncated write looks exactly
+# like a planted firmware defect.
+#
+# The only flag is `not-injectable`: force-kept at link time and gated in the
+# ELF, but not offered as an injection target.
+#
+# Blank lines and lines beginning with # are ignored.
+
+# symbol           unit             min         max     flags
+g_cell_temp_dC     deci-degrees-C  -400        1500
+g_pack_mv          millivolts         0      500000
+g_pack_ma          milliamps     -32000       32000
+g_tx_enable        boolean            0           1
+
+# Referenced by no line of C anywhere in the firmware, so it survives the link
+# only because of its --undefined flag. That makes it the negative control for
+# the symbol gate: withhold that one flag, with -DDETECT_OMIT_UNDEFINED, and the
+# linker discards it and the gate must refuse the binary.
+g_gc_canary        none               0  4294967295   not-injectable

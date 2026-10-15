@@ -1,0 +1,10 @@
+id: injection-lands
+description: >
+  Prove an injected write actually reached the running machine's memory. Without
+  this, a write that silently went nowhere is indistinguishable from firmware
+  that ignored it, and both look like a defect that was not detected.
+steps:
+  - wait_uart:     { node: bms, text: "BMS ready", timeout_ms: 500 }
+  - write_symbol:  { node: bms, symbol: g_pack_mv, value: 400000 }
+  - expect_symbol: { node: bms, symbol: g_pack_mv, equals: 400000,
+                     label: "the 400 V write landed and did not wrap" }

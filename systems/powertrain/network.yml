@@ -1,0 +1,28 @@
+# Topology of the powertrain domain.
+#
+# The engine reads this and contains none of it. Node ids, board names and bus
+# rates all live here so that a second, unrelated system runs on the same harness
+# with no change to any code.
+
+buses:
+  - id: powertrain
+    type: can
+    bitrate: 500000
+
+nodes:
+  - id: bms
+    type: real
+    board: bms_ecu
+    elf: systems/powertrain/firmware/bms/build/zephyr/zephyr.elf
+    boot_text: "BMS ready"
+    buses: [powertrain]
+    dut: true
+    tx_enable_symbol: g_tx_enable
+
+  - id: vcu
+    type: real
+    board: vcu_ecu
+    elf: systems/powertrain/firmware/vcu/build/zephyr/zephyr.elf
+    boot_text: "VCU ready"
+    buses: [powertrain]
+    tx_enable_symbol: g_tx_enable
